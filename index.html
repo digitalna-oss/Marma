@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mira Life Manager</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f0e9;color:#3e2b20;font-family:Arial,sans-serif}
+header{background:#765640;color:white;padding:20px;text-align:center;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:25px}
+header p{margin:7px 0 0;font-size:13px}
+nav{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid #ddd}
+nav button{border:0;background:white;padding:14px 16px;white-space:nowrap;color:#765640}
+nav button.active{background:#765640;color:#fff}
+main{padding:15px;max-width:1000px;margin:auto}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.card{background:#fff;border-radius:15px;padding:16px;box-shadow:0 2px 8px #00000010}
+.card h3{margin:0 0 8px;font-size:14px}
+.big{font-size:22px;font-weight:bold}
+button,.btn{border:0;border-radius:10px;padding:11px 14px;background:#765640;color:#fff;cursor:pointer}
+.add{width:100%;margin:12px 0;font-size:16px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;margin:5px 0 10px;background:#fff}
+label{font-size:13px}
+.item{background:#fff;padding:13px;border-radius:12px;margin:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.item small{color:#777}
+.delete{background:#b94b4b;padding:7px 10px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:30;padding:20px;overflow:auto}
+.modalbox{background:#fff;border-radius:18px;padding:20px;max-width:600px;margin:30px auto}
+.close{float:left;background:#eee;color:#333}
+.stat{font-size:12px;color:#765640}
+h2{margin-top:10px}
+.empty{text-align:center;color:#888;padding:25px}
+.green{color:#28784a}.red{color:#b23d3d}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>ميرا | حياتي</h1>
+<p>المال • العمل • المشاريع • المهام • التعلم • الرياضة • الصلاة • العادات</p>
+</header>
+
+<nav>
+<button class="active" onclick="show('home',this)">الرئيسية</button>
+<button onclick="show('money',this)">المال</button>
+<button onclick="show('work',this)">العمل</button>
+<button onclick="show('projects',this)">المشاريع</button>
+<button onclick="show('tasks',this)">المهام</button>
+<button onclick="show('appointments',this)">المواعيد</button>
+<button onclick="show('learning',this)">التعلم</button>
+<button onclick="show('sport',this)">الرياضة</button>
+<button onclick="show('faith',this)">الصلاة والورد</button>
+<button onclick="show('habits',this)">العادات</button>
+</nav>
+
+<main>
+
+<section id="home" class="page active">
+<h2>لوحة اليوم</h2>
+<div class="grid">
+<div class="card"><h3>الرصيد</h3><div class="big" id="homeBalance">0 دج</div></div>
+<div class="card"><h3>دخل الشهر</h3><div class="big green" id="homeIncome">0 دج</div></div>
+<div class="card"><h3>مصاريف الشهر</h3><div class="big red" id="homeExpense">0 دج</div></div>
+<div class="card"><h3>الادخار</h3><div class="big" id="homeSave">0 دج</div></div>
+<div class="card"><h3>الديون</h3><div class="big red" id="homeDebt">0 دج</div></div>
+<div class="card"><h3>مهام اليوم</h3><div class="big" id="homeTasks">0</div></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h3>ملخص العمل</h3>
+<div id="homeWork"></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h3>مواعيد اليوم</h3>
+<div id="homeAppointments"></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h3>اليوم</h3>
+<div id="today"></div>
+</div>
+</section>
+
+<section id="money" class="page">
+<h2>المال</h2>
+<div class="grid">
+<div class="card"><h3>الرصيد الأساسي</h3><div class="big" id="balance">0</div></div>
+<div class="card"><h3>الدخل</h3><div class="big green" id="income">0</div></div>
+<div class="card"><h3>المصاريف</h3><div class="big red" id="expense">0</div></div>
+<div class="card"><h3>الادخار</h3><div class="big" id="saving">0</div></div>
+<div class="card"><h3>الديون</h3><div class="big red" id="debt">0</div></div>
+</div>
+<button class="add" onclick="openModal('money')">＋ إضافة عملية مالية</button>
+<div id="moneyList"></div>
+</section>
+
+<section id="work" class="page">
+<h2>العمل</h2>
+<div class="grid">
+<div class="card"><h3>DiGitalna</h3><div id="digitalnaTotal">0 دج</div></div>
+<div class="card"><h3>Shaeela</h3><div id="shaeelaTotal">0 دج</div></div>
+<div class="card"><h3>Mamasitta</h3><div id="mamasittaTotal">0 دج</div></div>
+<div class="card"><h3>إجمالي الربح</h3><div id="workProfit">0 دج</div></div>
+</div>
+<button class="add" onclick="openModal('work')">＋ إضافة خدمة / طلب / عميل</button>
+<div id="workList"></div>
+</section>
+
+<section id="projects" class="page">
+<h2>المشاريع</h2>
+<button class="add" onclick="openModal('project')">＋ إضافة مشروع</button>
+<div id="projectList"></div>
+</section>
+
+<section id="tasks" class="page">
+<h2>المهام</h2>
+<button class="add" onclick="openModal('task')">＋ إضافة مهمة</button>
+<div id="taskList"></div>
+</section>
+
+<section id="appointments" class="page">
+<h2>المواعيد</h2>
+<button class="add" onclick="openModal('appointment')">＋ إضافة موعد</button>
+<div id="appointmentList"></div>
+</section>
+
+<section id="learning" class="page">
+<h2>التعلم</h2>
+<button class="add" onclick="openModal('learning')">＋ إضافة تعلم / دورة</button>
+<div id="learningList"></div>
+</section>
+
+<section id="sport" class="page">
+<h2>الرياضة</h2>
+<button class="add" onclick="openModal('sport')">＋ إضافة تمرين</button>
+<div id="sportList"></div>
+</section>
+
+<section id="faith" class="page">
+<h2>الصلاة والورد</h2>
+<div class="grid">
+<div class="card"><h3>الفجر</h3><button onclick="pray('الفجر')">✓</button></div>
+<div class="card"><h3>الظهر</h3><button onclick="pray('الظهر')">✓</button></div>
+<div class="card"><h3>العصر</h3><button onclick="pray('العصر')">✓</button></div>
+<div class="card"><h3>المغرب</h3><button onclick="pray('المغرب')">✓</button></div>
+<div class="card"><h3>العشاء</h3><button onclick="pray('العشاء')">✓</button></div>
+</div>
+<button class="add" onclick="openModal('faith')">＋ إضافة ورد / سورة / عبادة</button>
+<div id="faithList"></div>
+</section>
+
+<section id="habits" class="page">
+<h2>العادات</h2>
+<button class="add" onclick="openModal('habit')">＋ إضافة عادة</button>
+<div id="habitList"></div>
+</section>
+
+</main>
+
+<div class="modal" id="modal">
+<div class="modalbox">
+<button class="close" onclick="closeModal()">إغلاق</button>
+<h2 id="modalTitle"></h2>
+<div id="form"></div>
+<button onclick="saveModal()" style="width:100%">حفظ</button>
+</div>
+</div>
+
+<script>
+const KEY="MIRA_LIFE_APP";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"money":[],"work":[],"projects":[],"tasks":[],"appointments":[],"learning":[],"sport":[],"faith":[],"habits":[],"prayers":{}}');
+let currentType="";
+
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render();}
+
+function show(id,btn){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+btn.classList.add('active');
+render();
+}
+
+function fmt(n,c='دج'){
+return Number(n||0).toLocaleString('ar-DZ')+" "+c;
+}
+
+function openModal(type){
+currentType=type;
+document.getElementById('modal').style.display='block';
+const titles={
+money:'إضافة عملية مالية',work:'إضافة خدمة / طلب / عميل',
+project:'إضافة مشروع',task:'إضافة مهمة',appointment:'إضافة موعد',
+learning:'إضافة تعلم',sport:'إضافة تمرين',faith:'إضافة ورد / عبادة',habit:'إضافة عادة'
+};
+document.getElementById('modalTitle').innerText=titles[type];
+let f='';
+
+if(type==='money') f=`
+<label>النوع</label><select id="m_type">
+<option value="income">دخل</option><option value="expense">مصروف</option>
+<option value="saving">ادخار</option><option value="debt">دين عليّ</option>
+<option value="debtPaid">تسديد دين</option>
+</select>
+<label>المبلغ</label><input id="m_amount" type="number">
+<label>العملة</label><select id="m_currency"><option>DZD</option><option>USD</option></select>
+<label>التصنيف</label><input id="m_category" placeholder="أكل، نقل، عمل...">
+<label>التاريخ</label><input id="m_date" type="date" value="${today()}">
+<label>الساعة</label><input id="m_time" type="time">
+<label>ملاحظة</label><textarea id="m_note"></textarea>`;
+
+if(type==='work') f=`
+<label>المشروع</label><select id="w_project">
+<option>DiGitalna</option><option>Shaeela</option><option>Mamasitta</option>
+</select>
+<label>اسم العميل</label><input id="w_name">
+<label>اللقب</label><input id="w_last">
+<label>الخدمة / الدورة</label><input id="w_service">
+<label>السعر</label><input id="w_price" type="number">
+<label>التكلفة</label><input id="w_cost" type="number">
+<label>من جاب العميل؟</label><select id="w_source"><option>أنا</option><option>العميل تواصل وحده</option><option>شخص رشحني</option><option>غير ذلك</option></select>
+<label>التاريخ</label><input id="w_date" type="date" value="${today()}">
+<label>الساعة</label><input id="w_time" type="time">
+<label>الحالة</label><select id="w_status"><option>جديد</option><option>قيد العمل</option><option>مكتمل</option><option>مدفوع</option><option>ملغى</option></select>
+<label>ملاحظة</label><textarea id="w_note"></textarea>`;
+
+if(type==='project') f=`
+<label>اسم المشروع</label><input id="p_name">
+<label>الهدف</label><textarea id="p_goal"></textarea>
+<label>الميزانية</label><input id="p_budget" type="number">
+<label>تاريخ البداية</label><input id="p_date" type="date" value="${today()}">
+<label>الحالة</label><select id="p_status"><option>جديد</option><option>قيد العمل</option><option>متوقف</option><option>مكتمل</option></select>`;
+
+if(type==='task') f=`
+<label>المهمة</label><input id="t_name">
+<label>المشروع</label><input id="t_project">
+<label>التاريخ</label><input id="t_date" type="date" value="${today()}">
+<label>الساعة</label><input id="t_time" type="time">
+<label>الأولوية</label><select id="t_priority"><option>عادية</option><option>مهمة</option><option>عاجلة</option></select>
+<label>التكرار</label><select id="t_repeat"><option>مرة واحدة</option><option>يومياً</option><option>أسبوعياً</option><option>شهرياً</option></select>
+<label>ملاحظة</label><textarea id="t_note"></textarea>`;
+
+if(type==='appointment') f=`
+<label>اسم الموعد</label><input id="a_name">
+<label>مع من؟</label><input id="a_person">
+<label>التاريخ</label><input id="a_date" type="date" value="${today()}">
+<label>الساعة</label><input id="a_time" type="time">
+<label>المدة بالدقائق</label><input id="a_duration" type="number">
+<label>التكرار</label><select id="a_repeat"><option>مرة واحدة</option><option>يومي</option><option>أسبوعي</option><option>شهري</option></select>
+<label>ملاحظة</label><textarea id="a_note"></textarea>`;
+
+if(type==='learning') f=`
+<label>ماذا أتعلم؟</label><input id="l_name">
+<label>المصدر</label><input id="l_source">
+<label>تاريخ البداية</label><input id="l_date" type="date" value="${today()}">
+<label>نسبة الإنجاز</label><input id="l_progress" type="number" min="0" max="100" value="0">
+<label>آخر شيء تعلمته</label><textarea id="l_note"></textarea>`;
+
+if(type==='sport') f=`
+<label>التمرين</label><input id="s_name">
+<label>المدة بالدقائق</label><input id="s_duration" type="number">
+<label>الجولات</label><input id="s_sets" type="number">
+<label>التكرارات</label><input id="s_reps" type="number">
+<label>التاريخ</label><input id="s_date" type="date" value="${today()}">
+<label>ملاحظة</label><textarea id="s_note"></textarea>`;
+
+if(type==='faith') f=`
+<label>النوع</label><select id="f_type"><option>ورد قرآن</option><option>سورة</option><option>ذكر</option><option>عبادة أخرى</option></select>
+<label>الاسم</label><input id="f_name">
+<label>الصفحات / العدد</label><input id="f_count" type="number">
+<label>التاريخ</label><input id="f_date" type="date" value="${today()}">
+<label>ملاحظة</label><textarea id="f_note"></textarea>`;
+
+if(type==='habit') f=`
+<label>اسم العادة</label><input id="h_name">
+<label>التكرار</label><select id="h_repeat"><option>يومية</option><option>أسبوعية</option><option>شهرية</option></select>
+<label>الوقت</label><input id="h_time" type="time">
+<label>الهدف</label><input id="h_goal" placeholder="مثلاً 30 مرة">
+<label>ملاحظة</label><textarea id="h_note"></textarea>`;
+
+document.getElementById('form').innerHTML=f;
+}
+
+function closeModal(){document.getElementById('modal').style.display='none'}
+
+function val(id){return document.getElementById(id)?.value||''}
+
+function saveModal(){
+let x={id:Date.now()};
+
+if(currentType==='money'){
+x={...x,type:val('m_type'),amount:+val('m_amount'),currency:val('m_currency'),category:val('m_category'),date:val('m_date'),time:val('m_time'),note:val('m_note')};
+db.money.push(x);
+}
+
+if(currentType==='work'){
+x={...x,project:val('w_project'),name:val('w_name'),last:val('w_last'),service:val('w_service'),price:+val('w_price'),cost:+val('w_cost'),profit:+val('w_price')-+val('w_cost'),source:val('w_source'),date:val('w_date'),time:val('w_time'),status:val('w_status'),note:val('w_note')};
+db.work.push(x);
+}
+
+if(currentType==='project'){
+x={...x,name:val('p_name'),goal:val('p_goal'),budget:+val('p_budget'),date:val('p_date'),status:val('p_status')};
+db.projects.push(x);
+}
+
+if(currentType==='task'){
+x={...x,name:val('t_name'),project:val('t_project'),date:val('t_date'),time:val('t_time'),priority:val('t_priority'),repeat:val('t_repeat'),note:val('t_note'),done:false};
+db.tasks.push(x);
+}
+
+if(currentType==='appointment'){
+x={...x,name:val('a_name'),person:val('a_person'),date:val('a_date'),time:val('a_time'),duration:val('a_duration'),repeat:val('a_repeat'),note:val('a_note')};
+db.appointments.push(x);
+}
+
+if(currentType==='learning'){
+x={...x,name:val('l_name'),source:val('l_source'),date:val('l_date'),progress:+val('l_progress'),note:val('l_note')};
+db.learning.push(x);
+}
+
+if(currentType==='sport'){
+x={...x,name:val('s_name'),duration:+val('s_duration'),sets:+val('s_sets'),reps:+val('s_reps'),date:val('s_date'),note:val('s_note')};
+db.sport.push(x);
+}
+
+if(currentType==='faith'){
+x={...x,type:val('f_type'),name:val('f_name'),count:+val('f_count'),date:val('f_date'),note:val('f_note')};
+db.faith.push(x);
+}
+
+if(currentType==='habit'){
+x={...x,name:val('h_name'),repeat:val('h_repeat'),time:val('h_time'),goal:val('h_goal'),note:val('h_note'),checks:{}};
+db.habits.push(x);
+}
+
+save();closeModal();
+}
+
+function del(type,id){
+db[type]=db[type].filter(x=>x.id!==id);
+save();
+}
+
+function today(){return new Date().toISOString().split('T')[0]}
+
+function pray(name){
+db.prayers[today()]??=[];
+if(!db.prayers[today()].includes(name))db.prayers[today()].push(name);
+save();
+}
+
+function renderMoney(){
+let income=db.money.filter(x=>x.type==='income'&&x.currency==='DZD').reduce((a,b)=>a+b.amount,0);
+let expense=db.money.filter(x=>x.type==='expense'&&x.currency==='DZD').reduce((a,b)=>a+b.amount,0);
+let saving=db.money.filter(x=>x.type==='saving'&&x.currency==='DZD').reduce((a,b)=>a+b.amount,0);
+let debt=db.money.filter(x=>x.type==='debt'&&x.currency==='DZD').reduce((a,b)=>a+b.amount,0);
+let paid=db.money.filter(x=>x.type==='debtPaid'&&x.currency==='DZD').reduce((a,b)=>a+b.amount,0);
+let salary=18000;
+let balance=salary+income-expense-saving-debt+paid;
+
+document.getElementById('balance').innerText=fmt(balance);
+document.getElementById('income').innerText=fmt(income+salary);
+document.getElementById('expense').innerText=fmt(expense);
+document.getElementById('saving').innerText=fmt(saving);
+document.getElementById('debt').innerText=fmt(debt-paid);
+
+document.getElementById('homeBalance').innerText=fmt(balance);
+document.getElementById('homeIncome').innerText=fmt(income+salary);
+document.getElementById('homeExpense').innerText=fmt(expense);
+document.getElementById('homeSave').innerText=fmt(saving);
+document.getElementById('homeDebt').innerText=fmt(debt-paid);
+
+document.getElementById('moneyList').innerHTML=db.money.length?db.money.slice().reverse().map(x=>`
+<div class="item">
+<div><b>${x.category||x.type}</b><br><small>${x.date} ${x.time||''} • ${x.note||''}</small></div>
+<div><b>${x.amount.toLocaleString()} ${x.currency}</b><br><button class="delete" onclick="del('money',${x.id})">حذف</button></div>
+</div>`).join(''):'<div class="empty">لا توجد عمليات مالية</div>';
+}
+
+function renderWork(){
+let projects=['DiGitalna','Shaeela','Mamasitta'];
+projects.forEach(p=>{
+let total=db.work.filter(x=>x.project===p).reduce((a,b)=>a+b.price,0);
+document.getElementById(p.toLowerCase()==='digitalna'?'digitalnaTotal':p.toLowerCase()==='shaeela'?'shaeelaTotal':'mamasittaTotal').innerText=fmt(total);
+});
+let profit=db.work.reduce((a,b)=>a+b.profit,0);
+document.getElementById('workProfit').innerText=fmt(profit);
+
+document.getElementById('workList').innerHTML=db.work.length?db.work.slice().reverse().map(x=>`
+<div class="item">
+<div><b>${x.service||'خدمة'}</b> — ${x.name} ${x.last}<br>
+<small>${x.project} • ${x.source} • ${x.status} • ${x.date} ${x.time||''}</small></div>
+<div><b>${fmt(x.price)}</b><br><small>ربح ${fmt(x.profit)}</small><br><button class="delete" onclick="del('work',${x.id})">حذف</button></div>
+</div>`).join(''):'<div class="empty">لا توجد أعمال</div>';
+
+document.getElementById('homeWork').innerHTML=db.work.length?
+`عدد العمليات: <b>${db.work.length}</b> — الربح الإجمالي: <b>${fmt(profit)}</b>`:'لا توجد عمليات عمل';
+}
+
+function renderList(type,id,template,empty){
+document.getElementById(id).innerHTML=db[type].length?
+db[type].slice().reverse().map(template).join(''):empty;
+}
+
+function render(){
+renderMoney();renderWork();
+
+renderList('projects','projectList',x=>`
+<div class="item"><div><b>${x.name}</b><br><small>${x.status} • ${x.date}<br>${x.goal}</small></div>
+<button class="delete" onclick="del('projects',${x.id})">حذف</button></div>`,'<div class="empty">لا توجد مشاريع</div>');
+
+renderList('tasks','taskList',x=>`
+<div class="item"><div><b>${x.name}</b><br><small>${x.date} ${x.time||''} • ${x.priority} • ${x.project||''}</small></div>
+<button onclick="toggleTask(${x.id})">${x.done?'✓ تم':'تم'}</button>
+<button class="delete" onclick="del('tasks',${x.id})">حذف</button></div>`,'<div class="empty">لا توجد مهام</div>');
+
+renderList('appointments','appointmentList',x=>`
+<div class="item"><div><b>${x.name}</b> — ${x.person}<br><small>${x.date} ${x.time||''} • ${x.duration||0} دقيقة</small></div>
+<button class="delete" onclick="del('appointments',${x.id})">حذف</button></div>`,'<div class="empty">لا توجد مواعيد</div>');
+
+renderList('learning','learningList',x=>`
+<div class="item"><div><b>${x.name}</b><br><small>${x.source} • ${x.progress}% • ${x.note}</small></div>
+<button class="delete" onclick="del('learning',${x.id})">حذف</button></div>`,'<div class="empty">لا يوجد تعلم</div>');
+
+renderList('sport','sportList',x=>`
+<div class="item"><div><b>${x.name}</b><br><small>${x.date} • ${x.duration} دقيقة • ${x.sets} جولات × ${x.reps}</small></div>
+<button class="delete" onclick="del('sport',${x.id})">حذف</button></div>`,'<div class="empty">لا توجد تمارين</div>');
+
+let prayers=db.prayers[today()]||[];
+document.getElementById('faithList').innerHTML=
+`<div class="card">صلاة اليوم: <b>${prayers.length}/5</b><br>${prayers.join(' • ')||'لم تسجلي أي صلاة بعد'}</div>`+
+(db.faith.length?db.faith.slice().reverse().map(x=>`
+<div class="item"><div><b>${x.type}: ${x.name}</b><br><small>${x.date} • ${x.count||0}</small></div>
+<button class="delete" onclick="del('faith',${x.id})">حذف</button></div>`).join(''):'<div class="empty">لا يوجد ورد مسجل</div>');
+
+renderList('habits','habitList',x=>`
+<div class="item"><div><b>${x.name}</b><br><small>${x.repeat} • ${x.time||''} • الهدف: ${x.goal||''}</small></div>
+<button onclick="checkHabit(${x.id})">✓ اليوم</button>
+<button class="delete" onclick="del('habits',${x.id})">حذف</button></div>`,'<div class="empty">لا توجد عادات</div>');
+
+let tt=db.tasks.filter(x=>x.date===today());
+document.getElementById('homeTasks').innerText=tt.length;
+document.getElementById('homeAppointments').innerHTML=db.appointments.filter(x=>x.date===today()).map(x=>`<div>${x.time||''} — ${x.name}</div>`).join('')||'لا توجد مواعيد اليوم';
+document.getElementById('today').innerHTML=`${new Date().toLocaleDateString('ar-DZ',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+}
+
+function toggleTask(id){
+let x=db.tasks.find(x=>x.id===id);if(x)x.done=!x.done;save();
+}
+
+function checkHabit(id){
+let x=db.habits.find(x=>x.id===id);
+if(x){x.checks??={};x.checks[today()]=true}
+save();
+}
+
+render();
+</script>
+
+</body>
+</html>
